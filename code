@@ -1,0 +1,95 @@
+from flask import Flask, render_template_string, request, redirect, url_for, session
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_sqlalchemy import SQLAlchemy
+
+app = Flask(_name_)
+app.secret_key = 'secret123'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
+db = SQLAlchemy(app)
+
+# User model
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(100), unique=True, nullable=False)
+    password = db.Column(db.String(200), nullable=False)
+
+# Templates (embedded HTML)
+login_page = '''
+    <h2>Login</h2>
+    <form method="POST">
+        <input name="username" placeholder="Username" required><br>
+        <input name="password" type="password" placeholder="Password" required><br>
+        <button type="submit">Login</button>
+    </form>
+    <p>Don't have an account? <a href="/register">Register</a></p>
+    {{ message }}
+'''
+
+register_page = '''
+    <h2>Register</h2>
+    <form method="POST">
+        <input name="username" placeholder="Username" required><br>
+        <input name="password" type="password" placeholder="Password" required><br>
+        <button type="submit">Register</button>
+    </form>
+    <p>Already have an account? <a href="/login">Login</a></p>
+    {{ message }}
+'''
+
+dashboard_page = '''
+    <h2>Welcome, {{ user }}</h2>
+    <p>This is a protected dashboard.</p>
+    <a href="/logout">Logout</a>
+'''
+
+# Routes
+@app.route('/')
+def home():
+    return redirect(url_for('login'))
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    message = ''
+    if request.method == 'POST':
+        uname = request.form['username']
+        pword = request.form['password']
+        if User.query.filter_by(username=uname).first():
+            message = 'Username already exists.'
+        else:
+            hashed = generate_password_hash(pword)
+            new_user = User(username=uname, password=hashed)
+            db.session.add(new_user)
+            db.session.commit()
+            return redirect(url_for('login'))
+    return render_template_string(register_page, message=message)
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    message = ''
+    if request.method == 'POST':
+        uname = request.form['username']
+        pword = request.form['password']
+        user = User.query.filter_by(username=uname).first()
+        if user and check_password_hash(user.password, pword):
+            session['user'] = uname
+            return redirect(url_for('dashboard'))
+        else:
+            message = 'Invalid credentials.'
+    return render_template_string(login_page, message=message)
+
+@app.route('/dashboard')
+def dashboard():
+    if 'user' in session:
+        return render_template_string(dashboard_page, user=session['user'])
+    return redirect(url_for('login'))
+
+@app.route('/logout')
+def logout():
+    session.pop('user', None)
+    return redirect(url_for('login'))
+
+# Run the app
+if _name_ == '_main_':
+    with app.app_context():
+        db.create_all()
+    app.run(debug=True)
