@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+            width: 95%;
+            max-width: 1200px;
+            min-height: 600px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .logout-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .logout-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        .login-form {
+            padding: 60px 40px;
+            text-align: center;
+        }
+
+        .login-form h2 {
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2em;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+        }
+
+        .btn-success {
+            background: #28a745;
+        }
+
+        .main-content {
+            padding: 30px;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 200px;
+            max-width: 300px;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 40px 12px 12px;
+            border: 2px solid #ddd;
+            border-radius: 25px;
+            font-size: 16px;
+        }
+
+        .search-box::after {
+            content: '🔍';
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 16px;
+        }
+
+        .employee-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .employee-table th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: bold;
+        }
+
+        .employee-table td {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .employee-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .employee-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 28px;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .close:hover {
+            color: #333;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        .employee-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .employee-actions button {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .edit-btn {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+        }
+
+        .employee-actions button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        }
+
+        .no-employees {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-size: 18px;
+        }
+
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                width: 100%;
+                margin: 0;
+                border-radius: 0;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .search-box {
+                max-width: none;
+            }
+            
+            .employee-table {
+                font-size: 14px;
+            }
+            
+            .employee-table th, .employee-table td {
+                padding: 10px;
+            }
+            
+            .form-row {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Employee Management System</h1>
+            <button class="logout-btn" onclick="logout()" style="display: none;" id="logoutBtn">Logout</button>
+        </div>
+
+        <!-- Login Form -->
+        <div id="loginForm" class="login-form">
+            <h2>Administrator Login</h2>
+            <div id="loginAlert"></div>
+            <form onsubmit="login(event)">
+                <div class="form-group">
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <button type="submit" class="btn">Login</button>
+            </form>
+            <p style="margin-top: 20px; color: #666; font-size: 14px;">
+                Demo credentials: admin / password123
+            </p>
+        </div>
+
+        <!-- Main Application -->
+        <div id="mainApp" class="main-content" style="display: none;">
+            <div id="alertContainer"></div>
+            
+            <div class="controls">
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="Search employees..." onkeyup="filterEmployees()">
+                </div>
+                <button class="btn btn-success" onclick="openAddModal()">Add New Employee</button>
+            </div>
+
+            <table class="employee-table" id="employeeTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Department</th>
+                        <th>Position</th>
+                        <th>Salary</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="employeeTableBody">
+                    <!-- Employee data will be populated here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Add/Edit Employee Modal -->
+    <div id="employeeModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2 id="modalTitle">Add New Employee</h2>
+            <form id="employeeForm" onsubmit="saveEmployee(event)">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="firstName">First Name:</label>
+                        <input type="text" id="firstName" name="firstName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="lastName">Last Name:</label>
+                        <input type="text" id="lastName" name="lastName" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="department">Department:</label>
+                        <select id="department" name="department" required>
+                            <option value="">Select Department</option>
+                            <option value="Engineering">Engineering</option>
+                            <option value="Marketing">Marketing</option>
+                            <option value="Sales">Sales</option>
+                            <option value="HR">Human Resources</option>
+                            <option value="Finance">Finance</option>
+                            <option value="Operations">Operations</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="position">Position:</label>
+                        <input type="text" id="position" name="position" required>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="salary">Salary:</label>
+                        <input type="number" id="salary" name="salary" min="0" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="startDate">Start Date:</label>
+                        <input type="date" id="startDate" name="startDate" required>
+                    </div>
+                </div>
+                
+                <div style="text-align: center; margin-top: 30px;">
+                    <button type="submit" class="btn btn-success">Save Employee</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Application state
+        let employees = [];
+        let isAuthenticated = false;
+        let currentEditingId = null;
+        let nextId = 1;
+
+        // Sample data
+        const sampleEmployees = [
+            {
+                id: 1,
+                firstName: 'John',
+                lastName: 'Doe',
+                email: 'john.doe@company.com',
+                department: 'Engineering',
+                position: 'Software Engineer',
+                salary: 75000,
+                startDate: '2023-01-15'
+            },
+            {
+                id: 2,
+                firstName: 'Jane',
+                lastName: 'Smith',
+                email: 'jane.smith@company.com',
+                department: 'Marketing',
+                position: 'Marketing Manager',
+                salary: 65000,
+                startDate: '2023-03-20'
+            },
+            {
+                id: 3,
+                firstName: 'Mike',
+                lastName: 'Johnson',
+                email: 'mike.johnson@company.com',
+                department: 'Sales',
+                position: 'Sales Representative',
+                salary: 55000,
+                startDate: '2023-05-10'
+            }
+        ];
+
+        // Authentication
+        function login(event) {
+            event.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            // Simple authentication (in real app, this would be server-side)
+            if (username === 'admin' && password === 'password123') {
+                isAuthenticated = true;
+                document.getElementById('loginForm').style.display = 'none';
+                document.getElementById('mainApp').style.display = 'block';
+                document.getElementById('logoutBtn').style.display = 'block';
+                initializeApp();
+                showAlert('Login successful!', 'success');
+            } else {
+                showAlert('Invalid credentials. Please try again.', 'error', 'loginAlert');
+            }
+        }
+
+        function logout() {
+            isAuthenticated = false;
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('mainApp').style.display = 'none';
+            document.getElementById('logoutBtn').style.display = 'none';
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            clearAlert('loginAlert');
+        }
+
+        // Initialize application
+        function initializeApp() {
+            employees = [...sampleEmployees];
+            nextId = Math.max(...employees.map(e => e.id)) + 1;
+            renderEmployeeTable();
+        }
+
+        // CRUD Operations
+        function createEmployee(employeeData) {
+            const newEmployee = {
+                id: nextId++,
+                ...employeeData
+            };
+            employees.push(newEmployee);
+            renderEmployeeTable();
+            showAlert('Employee added successfully!', 'success');
+        }
+
+        function updateEmployee(id, employeeData) {
+            const index = employees.findIndex(emp => emp.id === id);
+            if (index !== -1) {
+                employees[index] = { id, ...employeeData };
+                renderEmployeeTable();
+                showAlert('Employee updated successfully!', 'success');
+            }
+        }
+
+        function deleteEmployee(id) {
+            const employee = employees.find(emp => emp.id === id);
+            if (employee && confirm(Are you sure you want to delete ${employee.firstName} ${employee.lastName}?)) {
+                employees = employees.filter(emp => emp.id !== id);
+                renderEmployeeTable();
+                showAlert('Employee deleted successfully!', 'success');
+            }
+        }
+
+        // UI Functions
+        function renderEmployeeTable() {
+            const tbody = document.getElementById('employeeTableBody');
+            
+            if (employees.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="no-employees">No employees found</td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = employees.map(employee => `
+                <tr>
+                    <td>${employee.id}</td>
+                    <td>${employee.firstName} ${employee.lastName}</td>
+                    <td>${employee.email}</td>
+                    <td>${employee.department}</td>
+                    <td>${employee.position}</td>
+                    <td>$${employee.salary.toLocaleString()}</td>
+                    <td class="employee-actions">
+                        <button class="edit-btn" onclick="editEmployee(${employee.id})">Edit</button>
+                        <button class="delete-btn" onclick="deleteEmployee(${employee.id})">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function openAddModal() {
+            currentEditingId = null;
+            document.getElementById('modalTitle').textContent = 'Add New Employee';
+            document.getElementById('employeeForm').reset();
+            document.getElementById('employeeModal').style.display = 'block';
+        }
+
+        function editEmployee(id) {
+            const employee = employees.find(emp => emp.id === id);
+            if (!employee) return;
+
+            currentEditingId = id;
+            document.getElementById('modalTitle').textContent = 'Edit Employee';
+            
+            // Populate form with employee data
+            document.getElementById('firstName').value = employee.firstName;
+            document.getElementById('lastName').value = employee.lastName;
+            document.getElementById('email').value = employee.email;
+            document.getElementById('department').value = employee.department;
+            document.getElementById('position').value = employee.position;
+            document.getElementById('salary').value = employee.salary;
+            document.getElementById('startDate').value = employee.startDate;
+            
+            document.getElementById('employeeModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('employeeModal').style.display = 'none';
+            currentEditingId = null;
+        }
+
+        function saveEmployee(event) {
+            event.preventDefault();
+            
+            const formData = new FormData(event.target);
+            const employeeData = {
+                firstName: formData.get('firstName').trim(),
+                lastName: formData.get('lastName').trim(),
+                email: formData.get('email').trim(),
+                department: formData.get('department'),
+                position: formData.get('position').trim(),
+                salary: parseFloat(formData.get('salary')),
+                startDate: formData.get('startDate')
+            };
+
+            // Validation
+            if (!validateEmployee(employeeData)) {
+                return;
+            }
+
+            if (currentEditingId) {
+                updateEmployee(currentEditingId, employeeData);
+            } else {
+                createEmployee(employeeData);
+            }
+
+            closeModal();
+        }
+
+        function validateEmployee(employeeData) {
+            // Email validation
+            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailPattern.test(employeeData.email)) {
+                showAlert('Please enter a valid email address.', 'error');
+                return false;
+            }
+
+            // Check for duplicate email (excluding current employee when editing)
+            const existingEmployee = employees.find(emp => 
+                emp.email.toLowerCase() === employeeData.email.toLowerCase() && 
+                emp.id !== currentEditingId
+            );
+            if (existingEmployee) {
+                showAlert('An employee with this email already exists.', 'error');
+                return false;
+            }
+
+            // Salary validation
+            if (employeeData.salary < 0) {
+                showAlert('Salary cannot be negative.', 'error');
+                return false;
+            }
+
+            // Date validation
+            const startDate = new Date(employeeData.startDate);
+            const today = new Date();
+            if (startDate > today) {
+                showAlert('Start date cannot be in the future.', 'error');
+                return false;
+            }
+
+            return true;
+        }
+
+        function filterEmployees() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const filteredEmployees = employees.filter(employee =>
+                employee.firstName.toLowerCase().includes(searchTerm) ||
+                employee.lastName.toLowerCase().includes(searchTerm) ||
+                employee.email.toLowerCase().includes(searchTerm) ||
+                employee.department.toLowerCase().includes(searchTerm) ||
+                employee.position.toLowerCase().includes(searchTerm)
+            );
+
+            const tbody = document.getElementById('employeeTableBody');
+            if (filteredEmployees.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="no-employees">No employees match your search</td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = filteredEmployees.map(employee => `
+                <tr>
+                    <td>${employee.id}</td>
+                    <td>${employee.firstName} ${employee.lastName}</td>
+                    <td>${employee.email}</td>
+                    <td>${employee.department}</td>
+                    <td>${employee.position}</td>
+                    <td>$${employee.salary.toLocaleString()}</td>
+                    <td class="employee-actions">
+                        <button class="edit-btn" onclick="editEmployee(${employee.id})">Edit</button>
+                        <button class="delete-btn" onclick="deleteEmployee(${employee.id})">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function showAlert(message, type, containerId = 'alertContainer') {
+            const alertClass = type === 'success' ? 'alert-success' : 'alert-error';
+            const alertHtml = <div class="alert ${alertClass}">${message}</div>;
+            document.getElementById(containerId).innerHTML = alertHtml;
+            
+            // Auto-hide alert after 3 seconds
+            setTimeout(() => {
+                clearAlert(containerId);
+            }, 3000);
+        }
+
+        function clearAlert(containerId = 'alertContainer') {
+            document.getElementById(containerId).innerHTML = '';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('employeeModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set default date to today
+            document.getElementById('startDate').valueAsDate = new Date();
+        });
+    </script>
+</body>
+</html>
